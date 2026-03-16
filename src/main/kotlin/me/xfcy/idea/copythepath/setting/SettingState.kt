@@ -15,11 +15,16 @@ import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
 import com.intellij.util.xmlb.XmlSerializerUtil
 
+enum class PathType {
+    RELATIVE,
+    ABSOLUTE
+}
+
 @State(
         name = "CopyThePathConfig",
         storages = [Storage(StoragePathMacros.WORKSPACE_FILE)]
 )
-class SettingState(var pathPrefix: String? = ""): PersistentStateComponent<SettingState> {
+class SettingState(var pathPrefix: String? = "", var pathType: PathType = PathType.RELATIVE): PersistentStateComponent<SettingState> {
 
     companion object {
         fun getInstance(project: Project): SettingState? {

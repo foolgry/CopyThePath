@@ -15,6 +15,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.FormBuilder
+import javax.swing.JComboBox
 import javax.swing.JPanel
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
@@ -22,31 +23,44 @@ import javax.swing.event.DocumentListener
 class SettingComponent(project: Project) {
 
     private var prefix = ""
+    private var pathType = PathType.RELATIVE
     private val examplePath = "path/to/your/file.ext"
 
     val mainPanel: JPanel
     val pathPrefixText: JBTextField
+    val pathTypeCombo: JComboBox<PathType>
     val preview: JBLabel
 
     init {
         val state = SettingState.getInstance(project)
         prefix = state?.pathPrefix ?: ""
+        pathType = state?.pathType ?: PathType.RELATIVE
         pathPrefixText = JBTextField(prefix)
+        pathTypeCombo = JComboBox(PathType.values())
+        pathTypeCombo.selectedItem = pathType
         preview = JBLabel(prefix + examplePath)
 
         mainPanel = FormBuilder.createFormBuilder()
+                .addLabeledComponent(JBLabel("Path type: "), pathTypeCombo, 1, false)
                 .addLabeledComponent(JBLabel("Path prefix: "), pathPrefixText, 1, false)
                 .addLabeledComponent(JBLabel("Preview: "), preview, 1, false)
                 .addComponentFillVertically(JPanel(), 0)
                 .panel
 
         pathPrefixText.document.addDocumentListener(object: DocumentListener {
-            override fun insertUpdate(p0: DocumentEvent?) { changePreview() }
-            override fun removeUpdate(p0: DocumentEvent?) { changePreview() }
-            override fun changedUpdate(p0: DocumentEvent?) { changePreview() }
-            fun changePreview() {
-                preview.text = pathPrefixText.text + examplePath
-            }
+            override fun insertUpdate(p0: DocumentEvent?) { updatePreview() }
+            override fun removeUpdate(p0: DocumentEvent?) { updatePreview() }
+            override fun changedUpdate(p0: DocumentEvent?) { updatePreview() }
         })
+
+        pathTypeCombo.addActionListener { updatePreview() }
+    }
+
+    private fun updatePreview() {
+        val selectedType = pathTypeCombo.selectedItem as PathType
+        preview.text = when (selectedType) {
+            PathType.RELATIVE -> pathPrefixText.text + examplePath
+            PathType.ABSOLUTE -> "/$examplePath"
+        }
     }
 }

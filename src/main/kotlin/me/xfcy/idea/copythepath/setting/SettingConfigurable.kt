@@ -26,12 +26,15 @@ class SettingConfigurable(private val project: Project): Configurable {
     override fun isModified(): Boolean {
         val state = SettingState.getInstance(project)
         val prefix = state?.pathPrefix ?: ""
-        return (prefix != component.pathPrefixText.text)
+        val pathType = state?.pathType ?: PathType.RELATIVE
+        return (prefix != component.pathPrefixText.text) ||
+               (pathType != component.pathTypeCombo.selectedItem)
     }
 
     override fun apply() {
         val state = SettingState.getInstance(project)
         state?.pathPrefix = component.pathPrefixText.text
+        state?.pathType = component.pathTypeCombo.selectedItem as PathType
     }
 
     override fun getDisplayName(): String {
@@ -41,5 +44,6 @@ class SettingConfigurable(private val project: Project): Configurable {
     override fun reset() {
         val state = SettingState.getInstance(project)
         component.pathPrefixText.text = state?.pathPrefix
+        component.pathTypeCombo.selectedItem = state?.pathType ?: PathType.RELATIVE
     }
 }
