@@ -48,7 +48,7 @@ class CopyAction: AnAction() {
             filePath = prefix + filePath
         }
 
-        // 获取编辑器中的选中范围并附加行号
+        // Get editor selection and append line number
         val editor = CommonDataKeys.EDITOR.getData(e.dataContext)
         val selectionModel = editor?.selectionModel
 
